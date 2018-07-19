@@ -2,26 +2,36 @@ import itertools
 import requests
 import string
 import time
+import bs4
 
+class AAAA(object):
+	# TODO: Save state as cookies and cstf_tocken
 
-headers = {
-	'user-agent': 'my_crazy_bot',
-	'cookie': 'rseor3=true; session=9045a3bc38f1c08687f937e64c31f9aa856a0751gAJKnjhKW0dB1tKMxifMNn1xAVUHX2NzcmZ0X3ECWCgAAAAyMzM0NTQ3NzJmMzIyZmQyMTNlZGQ5ZGM1YzBhMzFhMGE1MzgwNjY5cQNzh3EELg=='
-}
+	headers = {
+		'user-agent': 'my_crazy_bot',
+		'cookie': 'rseor3=true; session=c6134f21077dd1669dd6e64e6453af516d5a1a7bgAJKsXFPW0dB1tPcbGCoRH1xAVUHX2NzcmZ0X3ECWCgAAAA5ZDA0NmIyZjMzYTcyMDEwMjBjNjQyMTg4MzNhZWNhNzM4Y2E1ZTYzcQNzh3EELg=='
+	}
+	def __init__(self):
+		pass
 
+	def get_payload(username):
+		return {'csrf_token': '9d046b2f33a7201020c64218833aeca738ca5e63', 'user': username}
 
-def get_payload(username):
-	return {'csrf_token': '233454772f322fd213edd9dc5c0a31a0a5380669', 'user': username}
+	def get_cookies():
+		# TODO: implement this!
+		pass
 
+	def get_csrf_token():
+	 	bs = bs4.BeautifulSoup(
+	 		requests.get('https://www.reddit.com/register').content,
+	 		'html.parser'
+	 	)
+	 	# TODO: Find a better way to filter csrf_token
+		b = filter(lambda x: 'csrf_token' == x.attrs['name'], bs.find_all('input'))
+	 	if len(b) > 1:
+	 		raise ValueError("Got more than one csrf_token")
 
-def get_cookies():
-	# TODO: implement this!
-	pass
-
-
-def get_csrf_token():
-	# TODO: get csrf token
-	pass
+	 	return b[0].attrs['value']
 
 
 r = requests.get('https://www.reddit.com/check_username')
