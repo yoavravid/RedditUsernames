@@ -11,12 +11,25 @@ class RedditSession():
     '''
 
     def __init__(self):
-        # TODO: Should I seperate the init function and the actual initiation to another function?
-        # for usage as follows:
-        # s = RedditSession()
-        # s.init()
+        self._cookies = {'rseor3': 'true'}
+        # TODO: Make this a property!
+        self._headers = {'user-agent': 'my_crazy_bot', 'cookie': self._cookies_as_string}
+
+    def init(self):
+        # logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
+        # then 'rolling' requests to check_username while updating the cookies everytime
+        self._cookies['session-tracker'] = self._get_session_tracker()
+        self._register_request =
         self._cookies = self._get_initial_cookies()
         self._csrf_token = self._get_csrf_token()
+
+    @property
+    def _cookies_as_string(self):
+        return '; '.join('='.join(item) for item in self._cookies.items())
+
+    def _get_session_tracker(self):
+        pass
+
 
     def _get_initial_cookies(self):
         ''' returns the inital cookies '''
@@ -24,4 +37,5 @@ class RedditSession():
 
     def _get_csrf_token(self):
         ''' returns the csrf token '''
+        # play with ipython until you find an easy way to get the cookies from the request
         pass
