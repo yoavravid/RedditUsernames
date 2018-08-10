@@ -2,7 +2,7 @@ import itertools
 import requests
 import string
 import time
-import bs4
+# import bs4
 
 class RedditSession():
     '''
@@ -10,10 +10,14 @@ class RedditSession():
     note: it is mostly useful since it takes care of the cookies and the csrf token for you
     '''
 
+    INITIAL_COOKIES = {'rseor3': 'true'}
+    INITIAL_HEADERS = {'user-agent': 'my_crazy_bot'}
+
     def __init__(self):
-        self._cookies = {'rseor3': 'true'}
-        # TODO: Make this a property!
-        self._headers = {'user-agent': 'my_crazy_bot', 'cookie': self._cookies_as_string}
+        self._cookies = self.INITIAL_COOKIES
+        self._headers = self.INITIAL_HEADERS
+        self._headers['cookies'] = self._cookies_as_string
+
 
     def init(self):
         # logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
