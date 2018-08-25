@@ -39,15 +39,17 @@ class RedditSession():
     def is_username_free(self, username):
         self._payload['csrf_token'] = str(self._csrf_token)
         self._payload['user'] = username
-        print(self._payload)
-        print(self.headers)
-        print(self.REDDIT_URL + '/check_username')
+        # print(self._payload)
+        # print(self.headers)
+        # print(self.REDDIT_URL + '/check_username')
         response = requests.request(
             'POST',
             self.REDDIT_URL + '/check_username',
             headers=self.headers,
             data=self._payload
         )
+
+        self._cookies['session'] = self._get_new_session_from_response(response)
 
         if response.status_code == 200:
             return True
@@ -76,8 +78,12 @@ class RedditSession():
 
     def _get_new_session_from_response(self, response):
         cookie_pairs = [cookie_pair.split('=') for cookie_pair in response.headers['set-cookie'].split(';')]
-        session = set(cookie_pair[1] for cookie_pair in cookie_pairs if cookie_pair[0] == 'session').pop()
-        return session + '=='
+        sessions = set(cookie_pair[1] for cookie_pair in cookie_pairs if cookie_pair[0] == 'session')
+
+        if len(sessions) != 1:
+            raise ValueError('Got unexpected amount of session cookies in set-cookie. Expected 1, got {}. session: {}'.format(len(sessions), sessions))
+
+        return sessions.pop() + '=='
 
     def _get_csrf_token(self, register_request):
         ''' returns the csrf token '''
