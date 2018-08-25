@@ -17,18 +17,15 @@ class RedditSession():
     def __init__(self):
         self._cookies = self.INITIAL_COOKIES
         self._headers = self.INITIAL_HEADERS
-        self._headers['cookies'] = self._cookies_as_string
+        self._headers['cookie'] = self._cookies_as_string
 
         self._csrf_token = ''
-        self._payload = {}
-
-
+        self._payload = dict()
 
     @property
     def headers(self):
-        self._headers['cookies'] = self._cookies_as_string
+        self._headers['cookie'] = self._cookies_as_string
         return self._headers
-
 
     def init(self):
         # logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
@@ -38,10 +35,13 @@ class RedditSession():
         register_request = requests.get(self.REDDIT_URL + '/register', headers=self.headers)
         self._initialize_cookies(register_request)
         self._csrf_token = self._get_csrf_token(register_request)
-        self._payload['csrf_token'] = self._csrf_token
 
     def is_username_free(self, username):
+        self._payload['csrf_token'] = str(self._csrf_token)
         self._payload['user'] = username
+        print(self._payload)
+        print(self.headers)
+        print(self.REDDIT_URL + '/check_username')
         response = requests.request(
             'POST',
             self.REDDIT_URL + '/check_username',
@@ -71,7 +71,13 @@ class RedditSession():
 
         # note: the headers['set-cookie'] value is a string in the cookie format: 'cookie=value; cookie=value',
         #   hence there is no need to reform it into a dict, and we can use as it is
-        self._headers['cookies'] += register_request.headers['set-cookie']
+        self._cookies['session'] = self._get_new_session_from_response(register_request)
+        self._cookies.pop('session-tracker')
+
+    def _get_new_session_from_response(self, response):
+        cookie_pairs = [cookie_pair.split('=') for cookie_pair in response.headers['set-cookie'].split(';')]
+        session = set(cookie_pair[1] for cookie_pair in cookie_pairs if cookie_pair[0] == 'session').pop()
+        return session + '=='
 
     def _get_csrf_token(self, register_request):
         ''' returns the csrf token '''
@@ -83,7 +89,6 @@ class RedditSession():
         csrf_tokens = set(html_input for html_input in bs.find_all('input') if html_input['name'] == 'csrf_token')
 
         if len(csrf_tokens) != 1:
-            raise ValueError('Found invalid amout of csrf_tokens. Found {}, expecting {}'.format(len(csrf_tokens), 1))
+            raise ValueError('Found invalid amount of csrf_tokens. Found {}, expecting {}'.format(len(csrf_tokens), 1))
 
         return csrf_tokens.pop()['value']
-
