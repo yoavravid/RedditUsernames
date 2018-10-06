@@ -77,10 +77,14 @@ class RedditSession():
         self._cookies.pop('session-tracker')
 
     def _get_new_session_from_response(self, response):
+        # TODO: find a better way to split the set-cookie header in order to extract the session part out of it!
+        # an optional solution: find('session') then count 152 chars long cookie
+        print('set cookie header: {}'.format(response.headers['set-cookie']))
         cookie_pairs = [cookie_pair.split('=') for cookie_pair in response.headers['set-cookie'].split(';')]
         sessions = set(cookie_pair[1] for cookie_pair in cookie_pairs if cookie_pair[0] == 'session')
 
         if len(sessions) != 1:
+            print('current cookies: {}'.format(self._cookies))
             raise ValueError('Got unexpected amount of session cookies in set-cookie. Expected 1, got {}. session: {}'.format(len(sessions), sessions))
 
         return sessions.pop() + '=='
