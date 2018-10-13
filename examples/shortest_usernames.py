@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import itertools
 from src.reddit_session import RedditSession
 
@@ -5,6 +7,7 @@ from src.reddit_session import RedditSession
 def main():
     with open('free_usernames.txt', 'a') as free_usernames:
         find_shortest_username(free_usernames)
+
 
 def find_shortest_username(output_file):
     '''

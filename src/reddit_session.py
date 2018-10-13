@@ -1,8 +1,6 @@
-import itertools
 import requests
-import string
-import time
 import bs4
+import re
 
 class RedditSession():
     '''
@@ -70,7 +68,6 @@ class RedditSession():
 
     def _initialize_cookies(self, register_request):
         ''' initializes the cookies according to the http response '''
-
         # note: the headers['set-cookie'] value is a string in the cookie format: 'cookie=value; cookie=value',
         #   hence there is no need to reform it into a dict, and we can use as it is
         self._cookies['session'] = self._get_new_session_from_response(register_request)
@@ -79,15 +76,19 @@ class RedditSession():
     def _get_new_session_from_response(self, response):
         # TODO: find a better way to split the set-cookie header in order to extract the session part out of it!
         # an optional solution: find('session') then count 152 chars long cookie
-        print('set cookie header: {}'.format(response.headers['set-cookie']))
-        cookie_pairs = [cookie_pair.split('=') for cookie_pair in response.headers['set-cookie'].split(';')]
-        sessions = set(cookie_pair[1] for cookie_pair in cookie_pairs if cookie_pair[0] == 'session')
+        match = re.search('session=(?P<session>.*?);', response.headers['set-cookie'])
+        print(match.group('session'))
+        return match.group('session')
 
-        if len(sessions) != 1:
-            print('current cookies: {}'.format(self._cookies))
-            raise ValueError('Got unexpected amount of session cookies in set-cookie. Expected 1, got {}. session: {}'.format(len(sessions), sessions))
-
-        return sessions.pop() + '=='
+        # print('set cookie header: {}'.format(response.headers['set-cookie']))
+        # cookie_pairs = [cookie_pair.split('=') for cookie_pair in response.headers['set-cookie'].split(';')]
+        # sessions = set(cookie_pair[1] for cookie_pair in cookie_pairs if cookie_pair[0] == 'session')
+        #
+        # if len(sessions) != 1:
+        #     print('current cookies: {}'.format(self._cookies))
+        #     raise ValueError('Got unexpected amount of session cookies in set-cookie. Expected 1, got {}. session: {}'.format(len(sessions), sessions))
+        #
+        # return sessions.pop() + '=='
 
     def _get_csrf_token(self, register_request):
         ''' returns the csrf token '''

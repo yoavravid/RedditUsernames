@@ -62,5 +62,5 @@ fabric.properties
 .idea/*
 
 # reddit_usernames_project:
-free_users.txt
+examples/free_usernames.txt
 __pycache__
