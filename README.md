@@ -7,21 +7,21 @@ This project's soul purpose is to find free usernames on [reddit](https://www.re
 The project is at its POC stage
 
 1. Clone the repository
-2. Open a session with 'reddit.com/register'
-3. Enter a valid email
-4. Open chrome's inspect -> network
-5. Send a username
-6. Replace the HTTP POST request's cookies and csrf token in main.py with the one's you find in the inspect
-7. Run [main.py](main.py)
+2. Use the reddit_session.py class in order to check if a username is free or not
+3. Take a look at the example scripts for nice examples!
+
 
 ### Prerequisites
 
 In order to run the program you will need to install [python 2.7](https://www.python.org/getit/)
 (Add libraries)
 
-## To Do List:
-1. Implement the get_cookies function in main.py 
-2. Implement the get_csrf function in main.py 
+In order to run the examples make sure your PYTHONPATH is set to the reddit_usernames directory
+
+## To Do
+1. Turn this script into a package
+2. Improve all the code in the project and go through CR
+3. Fix this README page after 1 and 2
 
 ## Authors
 
