@@ -61,6 +61,7 @@ class RedditSession():
         in this object we choose to manage the cookies as a dict, while in HTTP the cookies are managed as a string
         with a specific formatting. this function turns the dict into a cookie string in the HTTP form
         '''
+
         return '; '.join('='.join(item) for item in self._cookies.items())
 
     def _get_session_tracker(self):
@@ -69,8 +70,7 @@ class RedditSession():
 
     def _initialize_cookies(self, register_request):
         ''' initializes the cookies according to the http response '''
-        # note: the headers['set-cookie'] value is a string in the cookie format: 'cookie=value; cookie=value',
-        #   hence there is no need to reform it into a dict, and we can use as it is
+
         self._cookies['session'] = self._get_new_session_from_response(register_request)
         self._cookies.pop('session-tracker')
 

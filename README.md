@@ -24,6 +24,9 @@ In order to run the examples make sure your PYTHONPATH is set to the reddit_user
 2. Improve all the code in the project and go through CR
 3. Fix this README page after 1 and 2
 
+## Development Process
+The development process consisted of a research stage and a development stage.
+
 ## Authors
 
 * **Yoad Ravid** - *Initial work* - [yoavravid](https://github.com/yoavravid)
