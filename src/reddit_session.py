@@ -37,9 +37,6 @@ class RedditSession():
     def is_username_free(self, username):
         self._payload['csrf_token'] = str(self._csrf_token)
         self._payload['user'] = username
-        # print(self._payload)
-        # print(self.headers)
-        # print(self.REDDIT_URL + '/check_username')
         response = requests.request(
             'POST',
             self.REDDIT_URL + '/check_username',
@@ -60,6 +57,10 @@ class RedditSession():
 
     @property
     def _cookies_as_string(self):
+        '''
+        in this object we choose to manage the cookies as a dict, while in HTTP the cookies are managed as a string
+        with a specific formatting. this function turns the dict into a cookie string in the HTTP form
+        '''
         return '; '.join('='.join(item) for item in self._cookies.items())
 
     def _get_session_tracker(self):
@@ -74,8 +75,6 @@ class RedditSession():
         self._cookies.pop('session-tracker')
 
     def _get_new_session_from_response(self, response):
-        # TODO: find a better way to split the set-cookie header in order to extract the session part out of it!
-        # an optional solution: find('session') then count 152 chars long cookie
         match = re.search('session=(?P<session>.*?);', response.headers['set-cookie'])
         return match.group('session')
 
