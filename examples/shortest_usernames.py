@@ -1,4 +1,8 @@
 #! /usr/bin/python3
+# This module is an example for a possible usage of the 'reddit_session' package.
+# This example uses itertools to create every possible combination of letters and numbers in order to find the shortest
+# free username on reddit.com, starting from 3 letters.
+# This usage was my original motivation for writing the package.
 
 import itertools
 import logging
@@ -7,7 +11,7 @@ from src.reddit_session import RedditSession
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
     with open('free_usernames.txt', 'a') as free_usernames:
         find_shortest_username(free_usernames)
 
@@ -30,7 +34,7 @@ def find_shortest_username(output_file):
                 output_file.write(username_string + '\n')
                 output_file.flush()
             if count % 100 == 0:
-                logging.info('tried {} times'.format(count))
+                logging.info('tried {} usernames'.format(count))
 
 
 if __name__ == '__main__':
