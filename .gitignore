@@ -60,3 +60,7 @@ fabric.properties
 .idea/httpRequests
 
 .idea/*
+
+# reddit_usernames_project:
+free_users.txt
+__pycache__
