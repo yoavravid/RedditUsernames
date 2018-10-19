@@ -19,10 +19,6 @@ In order to run the program you will need to install [python 2.7](https://www.py
 
 In order to run the examples make sure your PYTHONPATH is set to the reddit_usernames directory
 
-## To Do
-1. Turn this script into a package
-2. Improve all the code in the project and go through CR
-3. Fix this README page after 1 and 2
 
 ## Development Process
 The development process consisted of a research stage and a development stage.
