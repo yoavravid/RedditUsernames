@@ -4,8 +4,6 @@ This project's soul purpose is to find free usernames on [reddit](https://www.re
 
 ## Getting Started
 
-The project is at its POC stage
-
 1. Clone the repository
 2. Initate a RedditSession object (reddit_session.py) and use the is_username_free(username) function to check whether 
 or not a username is free
@@ -25,8 +23,8 @@ The development process consisted of a research stage and a development stage.
 
 ## Authors
 
-* **Yoad Ravid** - *Initial work* - [yoavravid](https://github.com/yoavravid)
-* **Steven Dashevsky** - *Changing readme* - [Steven17D](https://github.com/Steven17D)
+* **Yoad Ravid** - *Development* - [yoavravid](https://github.com/yoavravid)
+* **Steven Dashevsky** - *Mentoring* - [Steven17D](https://github.com/Steven17D)
 
 See also the list of [contributors](https://github.com/yoavravid/reddit_usernames/contributors) who participated in this project.
 
