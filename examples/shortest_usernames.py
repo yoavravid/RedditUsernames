@@ -7,7 +7,7 @@
 import itertools
 import logging
 
-from src.reddit_session import RedditSession
+from reddit_usernames.reddit_session import RedditSession
 
 
 def main():
