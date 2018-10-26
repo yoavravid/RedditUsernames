@@ -25,6 +25,7 @@ def find_shortest_username(output_file):
 
     count = 0
     for i in range(3, 6):
+        # CR: Use string module
         for username in itertools.product('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456790_', repeat=i):
             count += 1
             username_string = ''.join(username)

@@ -1,1 +1,3 @@
 requests
+# CR: Didn't you miss bs4
+# CR: Do you want your dependencies writen in 2 places (requirements.txt and setup.py)?

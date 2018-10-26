@@ -4,6 +4,8 @@ import re
 
 
 class RedditSession:
+    # CR: Doc string is triple double-quoted string
+    # CR: Reorder the functions in the class
     '''
     a class used for managing a session with reddit.com
     note: it is mostly useful since it takes care of the cookies and the csrf token for you
@@ -20,15 +22,18 @@ class RedditSession:
         self._headers['cookie'] = self._cookies_as_string
 
         self._csrf_token = ''
+        # CR: I like this style (using dict() instead of {}) - +1
         self._payload = dict()
 
     @property
     def headers(self):
+        # CR: Look odd - why a getter modifies the header?
         self._headers['cookie'] = self._cookies_as_string
         return self._headers
 
     @property
     def _cookies_as_string(self):
+        # CR: Doc string is triple double-quoted string
         '''
         in this object we choose to manage the cookies as a dict, while in HTTP the cookies are managed as a string
         with a specific formatting. this function turns the dict into a cookie string in the HTTP form
@@ -41,6 +46,7 @@ class RedditSession:
         return response.cookies['session_tracker']
 
     def _initialize_cookies(self, register_request):
+        # CR: Doc string is triple double-quoted string
         ''' initializes the cookies according to the http response '''
 
         self._cookies['session'] = self._get_new_session_from_response(register_request)
@@ -48,25 +54,36 @@ class RedditSession:
 
     @staticmethod
     def _get_new_session_from_response(response):
+        # CR: Compile the regex only once
+        # CR: Don't use .* be more specific - session string has a fixed set of characters
+        # CR: Why the function called _get_*new*_session_from_response and not _get_session_from_response
         match = re.search('session=(?P<session>.*?);', response.headers['set-cookie'])
         return match.group('session')
 
     @staticmethod
     def _get_csrf_token(register_request):
+        # CR: Doc string is triple double-quoted string
         ''' returns the csrf token '''
 
+        # CR: Why multi line?
+        # CR: Meaningful naming?
         bs = bs4.BeautifulSoup(
             register_request.content,
             'html.parser'
         )
+        # CR: Can you use bs to find by name?
         csrf_tokens = set(html_input for html_input in bs.find_all('input') if html_input['name'] == 'csrf_token')
 
         if len(csrf_tokens) != 1:
+            # CR: RedditSessionError
             raise ValueError('Found invalid amount of csrf_tokens. Found {}, expecting {}'.format(len(csrf_tokens), 1))
 
+        # CR: Don't you want to convert it to string from unicode before return?
         return csrf_tokens.pop()['value']
 
     def initiate_session(self):
+        # CR: Doc string is triple double-quoted string
+        # CR: Why the user need to call it explicitly?
         # logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
         # then 'rolling' requests to check_username while updating the cookies every time
 
@@ -76,8 +93,11 @@ class RedditSession:
         self._csrf_token = self._get_csrf_token(register_request)
 
     def is_username_free(self, username):
-        self._payload['csrf_token'] = str(self._csrf_token)
+        # CR: What happens if the user calls this function before initiate_session?
+        # CR: Why _payload is a property of the class, it should be a function variable.
+        self._payload['csrf_token'] = (self._csrf_token)
         self._payload['user'] = username
+        # CR: requests.post
         response = requests.request(
             'POST',
             self.REDDIT_URL + '/check_username',
@@ -94,4 +114,5 @@ class RedditSession:
             return False
 
         else:
+            # CR: RedditSessionError?
             raise ValueError('Got unexpected return code {}'.format(response.status_code))
