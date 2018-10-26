@@ -8,7 +8,7 @@ from src.reddit_session import RedditSession
 
 def main():
     rs = RedditSession()
-    rs.init()
+    rs.initiate_session()
 
     with open('usernames_to_check.txt', 'r') as usernames:
         for username in usernames.readlines():
