@@ -8,5 +8,8 @@ setup(name='reddit_usernames',
       author_email='yravid@gmail.com',
       license='MIT',
       packages=['reddit_usernames'],
-      zip_safe=False
-      )
+      install_requires=[
+          'bs4',
+          'requests',
+      ],
+      zip_safe=False)
