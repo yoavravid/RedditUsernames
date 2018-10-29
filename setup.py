@@ -13,4 +13,3 @@ setup(name='reddit_usernames',
           'requests',
       ],
       zip_safe=False)
-# CR: Empty line in the end of the file

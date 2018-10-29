@@ -4,13 +4,12 @@ import re
 
 
 class RedditSession:
-    # CR: Doc string is triple double-quoted string
     # CR: Reorder the functions in the class
-    '''
+    """
     a class used for managing a session with reddit.com
     note: it is mostly useful since it takes care of the cookies and the csrf token for you
     note: the cookies are handled as a dict and the 'cookie_as_string' re-formats them to a cookie-string format.
-    '''
+    """
 
     REDDIT_URL = 'https://www.reddit.com'
     INITIAL_COOKIES = {'rseor3': 'true'}
@@ -22,7 +21,6 @@ class RedditSession:
         self._headers['cookie'] = self._cookies_as_string
 
         self._csrf_token = ''
-        # CR: I like this style (using dict() instead of {}) - +1
         self._payload = dict()
 
     @property
@@ -33,11 +31,10 @@ class RedditSession:
 
     @property
     def _cookies_as_string(self):
-        # CR: Doc string is triple double-quoted string
-        '''
+        """
         in this object we choose to manage the cookies as a dict, while in HTTP the cookies are managed as a string
         with a specific formatting. this function turns the dict into a cookie string in the HTTP form
-        '''
+        """
 
         return '; '.join('='.join(item) for item in self._cookies.items())
 
@@ -46,31 +43,24 @@ class RedditSession:
         return response.cookies['session_tracker']
 
     def _initialize_cookies(self, register_request):
-        # CR: Doc string is triple double-quoted string
-        ''' initializes the cookies according to the http response '''
+        """ initializes the cookies according to the http response """
 
-        self._cookies['session'] = self._get_new_session_from_response(register_request)
+        self._cookies['session'] = self._get_session_from_response(register_request)
         self._cookies.pop('session-tracker')
 
     @staticmethod
-    def _get_new_session_from_response(response):
+    def _get_session_from_response(response):
         # CR: Compile the regex only once
         # CR: Don't use .* be more specific - session string has a fixed set of characters
-        # CR: Why the function called _get_*new*_session_from_response and not _get_session_from_response
         match = re.search('session=(?P<session>.*?);', response.headers['set-cookie'])
         return match.group('session')
 
     @staticmethod
     def _get_csrf_token(register_request):
-        # CR: Doc string is triple double-quoted string
-        ''' returns the csrf token '''
+        """ returns the csrf token """
 
-        # CR: Why multi line?
         # CR: Meaningful naming?
-        bs = bs4.BeautifulSoup(
-            register_request.content,
-            'html.parser'
-        )
+        bs = bs4.BeautifulSoup(register_request.content, 'html.parser')
         # CR: Can you use bs to find by name?
         csrf_tokens = set(html_input for html_input in bs.find_all('input') if html_input['name'] == 'csrf_token')
 
@@ -105,7 +95,7 @@ class RedditSession:
             data=self._payload
         )
 
-        self._cookies['session'] = self._get_new_session_from_response(response)
+        self._cookies['session'] = self._get_session_from_response(response)
 
         if response.status_code == 200:
             return True
