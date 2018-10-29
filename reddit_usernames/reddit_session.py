@@ -24,7 +24,6 @@ class RedditSession:
         self._cookies = self.INITIAL_COOKIES
         self._headers = self.INITIAL_HEADERS
         self._headers['cookie'] = self._cookies_as_string
-        self._csrf_token = ''
         self._initiate_session()
 
     def is_username_free(self, username):
@@ -62,8 +61,10 @@ class RedditSession:
         return '; '.join('='.join(item) for item in self._cookies.items())
 
     def _initiate_session(self):
-        # logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
-        # then 'rolling' requests to check_username while updating the cookies every time
+        """
+        logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
+        then 'rolling' requests to check_username while updating the cookies every time
+        """
 
         self._cookies['session-tracker'] = self._get_session_tracker()
         register_request = requests.get(self.REDDIT_URL + '/register', headers=self.headers)
@@ -89,13 +90,10 @@ class RedditSession:
     def _get_csrf_token(register_request):
         """ returns the csrf token """
 
-        # CR: Meaningful naming?
-        bs = bs4.BeautifulSoup(register_request.content, 'html.parser')
-        # CR: Can you use bs to find by name?
-        csrf_tokens = set(html_input for html_input in bs.find_all('input') if html_input['name'] == 'csrf_token')
+        parsed_register_page = bs4.BeautifulSoup(register_request.content, 'html.parser')
+        csrf_tokens = parsed_register_page.findAll("input", {"name": "csrf_token"})
 
         if len(csrf_tokens) != 1:
             raise RedditSessionError('Found invalid amount of csrf_tokens. Found {}, expecting {}'.format(len(csrf_tokens), 1))
 
-        # CR: Don't you want to convert it to string from unicode before return?
         return csrf_tokens.pop()['value']
