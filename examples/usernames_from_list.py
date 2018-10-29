@@ -11,7 +11,7 @@ def main():
 
     with open('usernames_to_check.txt', 'r') as usernames:
         for username in usernames.readlines():
-            if len(username) == 0:
+            if len(username) < 3:
                 continue
             username = username.strip()
             if rs.is_username_free(username):
