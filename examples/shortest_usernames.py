@@ -6,6 +6,7 @@
 
 import itertools
 import logging
+from string import ascii_letters, digits
 
 from reddit_usernames.reddit_session import RedditSession
 
@@ -21,12 +22,10 @@ def find_shortest_username(output_file):
     This function finds the shortest free user names on reddit.com, and stores them in output_file
     '''
     rs = RedditSession()
-    rs._initiate_session()
 
     count = 0
     for i in range(3, 6):
-        # CR: Use string module
-        for username in itertools.product('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456790_', repeat=i):
+        for username in itertools.product(ascii_letters + digits + '_', repeat=i):
             count += 1
             username_string = ''.join(username)
             logging.debug('checking if username: {} is free'.format(username_string))

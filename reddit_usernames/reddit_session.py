@@ -3,6 +3,10 @@ import bs4
 import re
 
 
+class RedditSessionError(Exception):
+    pass
+
+
 class RedditSession:
     """
     a class used for managing a session with reddit.com
@@ -13,6 +17,8 @@ class RedditSession:
     REDDIT_URL = 'https://www.reddit.com'
     INITIAL_COOKIES = {'rseor3': 'true'}
     INITIAL_HEADERS = {'user-agent': 'my_crazy_bot'}
+    # CR: Don't use .* be more specific - session string has a fixed set of characters
+    SESSION_RE = re.compile('session=(?P<session>.*?);')
 
     def __init__(self):
         self._cookies = self.INITIAL_COOKIES
@@ -38,8 +44,7 @@ class RedditSession:
             return False
 
         else:
-            # CR: RedditSessionError?
-            raise ValueError('Got unexpected return code {}'.format(response.status_code))
+            raise RedditSessionError('Got unexpected return code {}'.format(response.status_code))
 
     @property
     def headers(self):
@@ -77,9 +82,7 @@ class RedditSession:
 
     @staticmethod
     def _get_session_from_response(response):
-        # CR: Compile the regex only once
-        # CR: Don't use .* be more specific - session string has a fixed set of characters
-        match = re.search('session=(?P<session>.*?);', response.headers['set-cookie'])
+        match = RedditSession.SESSION_RE.search(response.headers['set-cookie'])
         return match.group('session')
 
     @staticmethod
@@ -92,9 +95,7 @@ class RedditSession:
         csrf_tokens = set(html_input for html_input in bs.find_all('input') if html_input['name'] == 'csrf_token')
 
         if len(csrf_tokens) != 1:
-            # CR: RedditSessionError
-            raise ValueError('Found invalid amount of csrf_tokens. Found {}, expecting {}'.format(len(csrf_tokens), 1))
+            raise RedditSessionError('Found invalid amount of csrf_tokens. Found {}, expecting {}'.format(len(csrf_tokens), 1))
 
         # CR: Don't you want to convert it to string from unicode before return?
         return csrf_tokens.pop()['value']
-
