@@ -15,7 +15,6 @@ or not a username is free
 In order to run the program you will need to install [python 2.7](https://www.python.org/getit/)
 (Add libraries)
 
-In order to run the examples make sure your PYTHONPATH is set to the reddit_usernames directory
 
 
 ## Development Process
