@@ -4,7 +4,6 @@ import re
 
 
 class RedditSession:
-    # CR: Reorder the functions in the class
     """
     a class used for managing a session with reddit.com
     note: it is mostly useful since it takes care of the cookies and the csrf token for you
@@ -19,32 +18,15 @@ class RedditSession:
         self._cookies = self.INITIAL_COOKIES
         self._headers = self.INITIAL_HEADERS
         self._headers['cookie'] = self._cookies_as_string
-
         self._csrf_token = ''
-        self._payload = dict()
-
-    def initiate_session(self):
-        # CR: Doc string is triple double-quoted string
-        # CR: Why the user need to call it explicitly?
-        # logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
-        # then 'rolling' requests to check_username while updating the cookies every time
-
-        self._cookies['session-tracker'] = self._get_session_tracker()
-        register_request = requests.get(self.REDDIT_URL + '/register', headers=self.headers)
-        self._initialize_cookies(register_request)
-        self._csrf_token = self._get_csrf_token(register_request)
+        self._initiate_session()
 
     def is_username_free(self, username):
-        # CR: What happens if the user calls this function before initiate_session?
-        # CR: Why _payload is a property of the class, it should be a function variable.
-        self._payload['csrf_token'] = (self._csrf_token)
-        self._payload['user'] = username
-        # CR: requests.post
-        response = requests.request(
-            'POST',
+        payload = {'csrf_token': self._csrf_token, 'user': username}
+        response = requests.post(
             self.REDDIT_URL + '/check_username',
             headers=self.headers,
-            data=self._payload
+            data=payload
         )
 
         self._cookies['session'] = self._get_session_from_response(response)
@@ -73,6 +55,15 @@ class RedditSession:
         """
 
         return '; '.join('='.join(item) for item in self._cookies.items())
+
+    def _initiate_session(self):
+        # logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
+        # then 'rolling' requests to check_username while updating the cookies every time
+
+        self._cookies['session-tracker'] = self._get_session_tracker()
+        register_request = requests.get(self.REDDIT_URL + '/register', headers=self.headers)
+        self._initialize_cookies(register_request)
+        self._csrf_token = self._get_csrf_token(register_request)
 
     def _get_session_tracker(self):
         response = requests.get(self.REDDIT_URL, headers=self.headers)

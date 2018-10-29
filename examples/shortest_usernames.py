@@ -21,7 +21,7 @@ def find_shortest_username(output_file):
     This function finds the shortest free user names on reddit.com, and stores them in output_file
     '''
     rs = RedditSession()
-    rs.initiate_session()
+    rs._initiate_session()
 
     count = 0
     for i in range(3, 6):
