@@ -23,6 +23,42 @@ class RedditSession:
         self._csrf_token = ''
         self._payload = dict()
 
+    def initiate_session(self):
+        # CR: Doc string is triple double-quoted string
+        # CR: Why the user need to call it explicitly?
+        # logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
+        # then 'rolling' requests to check_username while updating the cookies every time
+
+        self._cookies['session-tracker'] = self._get_session_tracker()
+        register_request = requests.get(self.REDDIT_URL + '/register', headers=self.headers)
+        self._initialize_cookies(register_request)
+        self._csrf_token = self._get_csrf_token(register_request)
+
+    def is_username_free(self, username):
+        # CR: What happens if the user calls this function before initiate_session?
+        # CR: Why _payload is a property of the class, it should be a function variable.
+        self._payload['csrf_token'] = (self._csrf_token)
+        self._payload['user'] = username
+        # CR: requests.post
+        response = requests.request(
+            'POST',
+            self.REDDIT_URL + '/check_username',
+            headers=self.headers,
+            data=self._payload
+        )
+
+        self._cookies['session'] = self._get_session_from_response(response)
+
+        if response.status_code == 200:
+            return True
+
+        elif response.status_code == 400:
+            return False
+
+        else:
+            # CR: RedditSessionError?
+            raise ValueError('Got unexpected return code {}'.format(response.status_code))
+
     @property
     def headers(self):
         # CR: Look odd - why a getter modifies the header?
@@ -71,38 +107,3 @@ class RedditSession:
         # CR: Don't you want to convert it to string from unicode before return?
         return csrf_tokens.pop()['value']
 
-    def initiate_session(self):
-        # CR: Doc string is triple double-quoted string
-        # CR: Why the user need to call it explicitly?
-        # logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
-        # then 'rolling' requests to check_username while updating the cookies every time
-
-        self._cookies['session-tracker'] = self._get_session_tracker()
-        register_request = requests.get(self.REDDIT_URL + '/register', headers=self.headers)
-        self._initialize_cookies(register_request)
-        self._csrf_token = self._get_csrf_token(register_request)
-
-    def is_username_free(self, username):
-        # CR: What happens if the user calls this function before initiate_session?
-        # CR: Why _payload is a property of the class, it should be a function variable.
-        self._payload['csrf_token'] = (self._csrf_token)
-        self._payload['user'] = username
-        # CR: requests.post
-        response = requests.request(
-            'POST',
-            self.REDDIT_URL + '/check_username',
-            headers=self.headers,
-            data=self._payload
-        )
-
-        self._cookies['session'] = self._get_session_from_response(response)
-
-        if response.status_code == 200:
-            return True
-
-        elif response.status_code == 400:
-            return False
-
-        else:
-            # CR: RedditSessionError?
-            raise ValueError('Got unexpected return code {}'.format(response.status_code))
