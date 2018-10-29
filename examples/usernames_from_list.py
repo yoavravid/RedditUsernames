@@ -3,7 +3,7 @@
 # This module is an example for a simple usage of the reddit_session package
 # This module demonstrates checking whether or not usernames are free from a list given in 'usernames_to_check.txt' file
 
-from reddit_usernames.reddit_session import RedditSession
+from reddit_usernames import RedditSession
 
 
 def main():

@@ -8,7 +8,7 @@ import itertools
 import logging
 from string import ascii_letters, digits
 
-from reddit_usernames.reddit_session import RedditSession
+from reddit_usernames import RedditSession
 
 
 def main():

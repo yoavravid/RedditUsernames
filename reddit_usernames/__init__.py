@@ -1,1 +1,1 @@
-# CR: import here the RedditSession
+from .reddit_session import RedditSession
