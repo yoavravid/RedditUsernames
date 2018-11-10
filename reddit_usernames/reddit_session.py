@@ -17,8 +17,7 @@ class RedditSession:
     REDDIT_URL = 'https://www.reddit.com'
     INITIAL_COOKIES = {'rseor3': 'true'}
     INITIAL_HEADERS = {'user-agent': 'my_crazy_bot'}
-    # CR: Don't use .* be more specific - session string has a fixed set of characters
-    SESSION_RE = re.compile('session=(?P<session>.*?);')
+    SESSION_RE = re.compile('session=(?P<session>[a-zA-z0-9+]{150}==?);')
 
     def __init__(self):
         self._cookies = self.INITIAL_COOKIES
@@ -35,7 +34,6 @@ class RedditSession:
         )
 
         self._cookies['session'] = self._get_session_from_response(response)
-
         if response.status_code == 200:
             return True
 
@@ -47,7 +45,6 @@ class RedditSession:
 
     @property
     def headers(self):
-        # CR: Look odd - why a getter modifies the header?
         self._headers['cookie'] = self._cookies_as_string
         return self._headers
 
