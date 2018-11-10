@@ -45,11 +45,16 @@ class RedditSession:
 
     @property
     def headers(self):
+        # CR: Still don't like this property
+        # CR: Why it is exported? why the users cares about the headers?
+        # CR: A getter that changes _headers - looks bad
         self._headers['cookie'] = self._cookies_as_string
         return self._headers
 
     @property
     def _cookies_as_string(self):
+        # CR: Its not really a property cookies_as_string, cookies is a property
+        # CR: maybe static method cookie_to_string?
         """
         in this object we choose to manage the cookies as a dict, while in HTTP the cookies are managed as a string
         with a specific formatting. this function turns the dict into a cookie string in the HTTP form
@@ -63,12 +68,15 @@ class RedditSession:
         then 'rolling' requests to check_username while updating the cookies every time
         """
 
+        # CR: Use uniform style - change next line to use _initialize_session_tracker function
         self._cookies['session-tracker'] = self._get_session_tracker()
         register_request = requests.get(self.REDDIT_URL + '/register', headers=self.headers)
         self._initialize_cookies(register_request)
+        # CR: Use uniform style - change next line to use _initialize_csrf_token function
         self._csrf_token = self._get_csrf_token(register_request)
 
     def _get_session_tracker(self):
+        # CR: Can you get the session_tracker from the request in _initiate_session?
         response = requests.get(self.REDDIT_URL, headers=self.headers)
         return response.cookies['session_tracker']
 
@@ -76,6 +84,7 @@ class RedditSession:
         """ initializes the cookies according to the http response """
 
         self._cookies['session'] = self._get_session_from_response(register_request)
+        # CR: session_tracker or session-tracker
         self._cookies.pop('session-tracker')
 
     @staticmethod
@@ -93,4 +102,5 @@ class RedditSession:
         if len(csrf_tokens) != 1:
             raise RedditSessionError('Found invalid amount of csrf_tokens. Found {}, expecting {}'.format(len(csrf_tokens), 1))
 
+        # CR: Validate the CSRF token value - does it have a fixed format?
         return csrf_tokens.pop()['value']
