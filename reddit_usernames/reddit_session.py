@@ -17,19 +17,20 @@ class RedditSession:
     REDDIT_URL = 'https://www.reddit.com'
     INITIAL_COOKIES = {'rseor3': 'true'}
     INITIAL_HEADERS = {'user-agent': 'my_crazy_bot'}
-    SESSION_RE = re.compile('session=(?P<session>[a-zA-z0-9+]{150}==?);')
+    SESSION_PATTERN = re.compile('session=(?P<session>[a-zA-z0-9+]{150}==?);')
+    CSRF_TOKEN_PATTERN = re.compile('(?P<csrf_token>[a-f0-9]{40}?)')
 
     def __init__(self):
         self._cookies = self.INITIAL_COOKIES
         self._headers = self.INITIAL_HEADERS
-        self._headers['cookie'] = self._cookies_as_string
+        self._headers['cookie'] = self._cookies_as_string(self._cookies)
         self._initiate_session()
 
     def is_username_free(self, username):
         payload = {'csrf_token': self._csrf_token, 'user': username}
         response = requests.post(
             self.REDDIT_URL + '/check_username',
-            headers=self.headers,
+            headers=self._get_formatted_headers(),
             data=payload
         )
 
@@ -43,57 +44,36 @@ class RedditSession:
         else:
             raise RedditSessionError('Got unexpected return code {}'.format(response.status_code))
 
-    @property
-    def headers(self):
-        # CR: Still don't like this property
-        # CR: Why it is exported? why the users cares about the headers?
-        # CR: A getter that changes _headers - looks bad
-        self._headers['cookie'] = self._cookies_as_string
+    def _get_formatted_headers(self):
+        self._headers['cookie'] = self._cookies_as_string(self._cookies)
         return self._headers
 
-    @property
-    def _cookies_as_string(self):
-        # CR: Its not really a property cookies_as_string, cookies is a property
-        # CR: maybe static method cookie_to_string?
+    @staticmethod
+    def _cookies_as_string(cookies):
         """
-        in this object we choose to manage the cookies as a dict, while in HTTP the cookies are managed as a string
+        In this object we choose to manage the cookies as a dict, while in HTTP the cookies are managed as a string
         with a specific formatting. this function turns the dict into a cookie string in the HTTP form
         """
 
-        return '; '.join('='.join(item) for item in self._cookies.items())
+        return '; '.join('='.join(item) for item in cookies.items())
 
     def _initiate_session(self):
         """
-        logic: 1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
+        1st request to get the session tracker, 2nd request (to register) to get the csrf token and cookies
         then 'rolling' requests to check_username while updating the cookies every time
         """
 
-        # CR: Use uniform style - change next line to use _initialize_session_tracker function
-        self._cookies['session-tracker'] = self._get_session_tracker()
-        register_request = requests.get(self.REDDIT_URL + '/register', headers=self.headers)
-        self._initialize_cookies(register_request)
-        # CR: Use uniform style - change next line to use _initialize_csrf_token function
-        self._csrf_token = self._get_csrf_token(register_request)
-
-    def _get_session_tracker(self):
-        # CR: Can you get the session_tracker from the request in _initiate_session?
-        response = requests.get(self.REDDIT_URL, headers=self.headers)
-        return response.cookies['session_tracker']
-
-    def _initialize_cookies(self, register_request):
-        """ initializes the cookies according to the http response """
-
+        register_request = requests.get(self.REDDIT_URL + '/register', headers=self._get_formatted_headers())
         self._cookies['session'] = self._get_session_from_response(register_request)
-        # CR: session_tracker or session-tracker
-        self._cookies.pop('session-tracker')
+        self._csrf_token = self._get_csrf_token_from_response(register_request)
 
     @staticmethod
     def _get_session_from_response(response):
-        match = RedditSession.SESSION_RE.search(response.headers['set-cookie'])
+        match = RedditSession.SESSION_PATTERN.search(response.headers['set-cookie'])
         return match.group('session')
 
     @staticmethod
-    def _get_csrf_token(register_request):
+    def _get_csrf_token_from_response(register_request):
         """ returns the csrf token """
 
         parsed_register_page = bs4.BeautifulSoup(register_request.content, 'html.parser')
@@ -102,5 +82,7 @@ class RedditSession:
         if len(csrf_tokens) != 1:
             raise RedditSessionError('Found invalid amount of csrf_tokens. Found {}, expecting {}'.format(len(csrf_tokens), 1))
 
-        # CR: Validate the CSRF token value - does it have a fixed format?
-        return csrf_tokens.pop()['value']
+        csrf_token = csrf_tokens.pop()['value']
+        if not RedditSession.CSRF_TOKEN_PATTERN.match(csrf_token):
+            raise RedditSessionError(f'Got invalid csrf_token from server: {csrf_token}')
+        return csrf_token
