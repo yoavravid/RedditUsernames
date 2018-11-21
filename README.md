@@ -4,7 +4,7 @@ This project's soul purpose is to find free usernames on [reddit](https://www.re
 
 ## Getting Started
 
-1. Clone the repository
+1. pip install reddit_usernames (or clone the repo)
 2. Initate a RedditSession object (reddit_session.py) and use the is_username_free(username) function to check whether 
 or not a username is free
 3. Take a look at the example scripts for nice examples!
@@ -12,9 +12,7 @@ or not a username is free
 
 ### Prerequisites
 
-In order to run the program you will need to install [python 2.7](https://www.python.org/getit/)
-(Add libraries)
-
+In order to run the program you will need to install [python 3](https://www.python.org/getit/)
 
 
 ## Development Process
